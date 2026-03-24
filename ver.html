@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Especial 💌</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .carta {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            animation: fadeIn 1s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hearts {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: heartbeat 1.5s ease infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .para {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .de {
+            text-align: center;
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .mensaje {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+            padding: 20px;
+            background: #fff9fc;
+            border-left: 5px solid #f5576c;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .fecha {
+            text-align: right;
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 30px;
+            font-style: italic;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 1.5em;
+        }
+        .error {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 15px;
+            color: #333;
+        }
+        .error h2 {
+            color: #f5576c;
+            margin-bottom: 15px;
+        }
+        .btn-home {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #764ba2;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .btn-home:hover {
+            transform: scale(1.05);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .decoracion {
+            position: fixed;
+            font-size: 2em;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decoración flotante -->
+    <div class="decoracion" style="top: 10%; left: 5%;">💕</div>
+    <div class="decoracion" style="top: 20%; right: 10%; animation-delay: 1s;">💖</div>
+    <div class="decoracion" style="bottom: 15%; left: 8%; animation-delay: 2s;">💗</div>
+    <div class="decoracion" style="bottom: 25%; right: 5%; animation-delay: 3s;">💝</div>
+
+    <div id="content">
+        <div class="loading">⏳ Cargando tu carta especial...</div>
+    </div>
+
+    <div class="footer">
+        Hecho con 💖 usando Firebase
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, increment, updateDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMeWl3gz-iALWcMPwHW6TMgEEIUSYKBTw",
+            authDomain: "personalizacion-38cb1.firebaseapp.com",
+            projectId: "personalizacion-38cb1",
+            storageBucket: "personalizacion-38cb1.firebasestorage.app",
+            messagingSenderId: "434378253117",
+            appId: "1:434378253117:web:2c7a01062787756201db54",
+            measurementId: "G-HTVYPVSG4X"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Obtener ID de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const cartaId = urlParams.get('id');
+
+        async function cargarCarta() {
+            const content = document.getElementById('content');
+
+            if (!cartaId) {
+                content.innerHTML = `
+                    <div class="error">
+                        <h2>💔 Carta no encontrada</h2>
+                        <p>No se especificó ninguna carta para ver.</p>
+                        <a href="crear.html" class="btn-home">Crear una carta</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "cartas", cartaId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // Incrementar contador de visitas
+                    try {
+                        await updateDoc(docRef, {
+                            visitas: increment(1)
+                        });
+                    } catch (err) {
+                        console.log('No se pudo actualizar visitas');
+                    }
+
+                    // Formatear fecha
+                    let fechaFormateada = 'Fecha especial';
+                    if (data.fechaCreacion) {
+                        const fecha = data.fechaCreacion.toDate();
+                        fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+
+                    // Mostrar carta
+                    content.innerHTML = `
+                        <div class="carta">
+                            <div class="hearts">💌</div>
+                            <div class="para">Para: ${data.nombreNovia}</div>
+                            <div class="de">De: ${data.nombreRemitente}</div>
+                            
+                            <div class="mensaje">
+                                ${data.mensaje.replace(/\n/g, '<br>')}
+                            </div>
+                            
+                            <div class="fecha">
+                                ${fechaFormateada}
+                            </div>
+                        </div>
+                    `;
+
+                    // Cambiar título
+                    document.title = `💌 Carta para ${data.nombreNovia}`;
+
+                } else {
+                    content.innerHTML = `
+                        <div class="error">
+                            <h2>💔 Carta no encontrada</h2>
+                            <p>Es posible que la carta haya sido eliminada o el link sea incorrecto.</p>
+                            <a href="crear.html" class="btn-home">Crear una carta</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                content.innerHTML = `
+                    <div class="error">
+                        <h2>❌ Error</h2>
+                        <p>No se pudo cargar la carta. Intenta de nuevo más tarde.</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">${error.message}</p>
+                        <a href="crear.html" class="btn-home">Crear una carta</a>
+                    </div>
+                `;
+            }
+        }
+
+        cargarCarta();
+    </script>
+</body>
+</html>
