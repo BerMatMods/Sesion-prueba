@@ -121,9 +121,12 @@
         .error { background: #f8d7da; color: #721c24; }
         .loading { background: #d1ecf1; color: #0c5460; }
         
-        /* DASHBOARD STYLES */
+        /* DASHBOARD STYLES - CORREGIDO */
         #dashboard {
             display: none;
+        }
+        #dashboard.show {
+            display: block !important;
             animation: fadeIn 0.5s ease;
         }
         @keyframes fadeIn {
@@ -240,7 +243,7 @@
             </p>
         </div>
 
-        <!-- DASHBOARD SECTION -->
+        <!-- DASHBOARD SECTION - CORREGIDO -->
         <div id="dashboard">
             <div class="user-info">
                 <img id="userPhoto" src="" alt="Foto">
@@ -257,13 +260,13 @@
                     <p>Personaliza una carta especial y genera un link único</p>
                 </a>
 
-                <a href="#" class="menu-item" onclick="alert('Próximamente: Verás aquí tus cartas creadas')">
+                <a href="#" class="menu-item" onclick="alert('Próximamente: Verás aquí tus cartas creadas'); return false;">
                     <div class="icon">📬</div>
                     <h3>Mis Cartas</h3>
                     <p>Ver y gestionar tus cartas creadas</p>
                 </a>
 
-                <a href="#" class="menu-item" onclick="alert('Próximamente: Estadísticas de visitas')">
+                <a href="#" class="menu-item" onclick="alert('Próximamente: Estadísticas de visitas'); return false;">
                     <div class="icon">📊</div>
                     <h3>Estadísticas</h3>
                     <p>Ver cuántas veces han visto tus cartas</p>
@@ -353,12 +356,12 @@
             }
         });
 
-        // Auth State Observer
+        // Auth State Observer - CORREGIDO
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in - Show Dashboard
                 loginSection.classList.add('hidden');
-                dashboard.style.display = 'block';
+                dashboard.classList.add('show');
                 
                 document.getElementById('userName').textContent = user.displayName || 'Usuario';
                 document.getElementById('userEmail').textContent = user.email;
@@ -368,7 +371,7 @@
             } else {
                 // User is signed out - Show Login
                 loginSection.classList.remove('hidden');
-                dashboard.style.display = 'none';
+                dashboard.classList.remove('show');
                 statusMessage.style.display = 'none';
             }
         });
